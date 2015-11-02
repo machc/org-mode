@@ -740,6 +740,15 @@ block."
 	      (setq call-process-region
 		    'org-babel-call-process-region-original)))))))))
 
+(defun org-babel-execute-src-block-region (beg end)
+  "Execute region in the current source code block.
+`org-babel-execure-src-block' is called; the only change is that
+only the active region is sent, instead of the whole block."
+  (interactive "r")
+  (let ((info (org-babel-get-src-block-info)))
+    (setcar (nthcdr 1 info) (buffer-substring beg end))
+    (org-babel-execute-src-block nil info)))
+
 (defun org-babel-expand-body:generic (body params &optional var-lines)
   "Expand BODY with PARAMS.
 Expand a block of code with org-babel according to its header
