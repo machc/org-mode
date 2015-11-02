@@ -739,6 +739,34 @@ block."
 	      (setq call-process-region
 		    'org-babel-call-process-region-original)))))))))
 
+(defun org-babel-execute-src-block-region (beg end)
+  "Execute region in the current source code block.
+`org-babel-execure-src-block' is called; the only change is that
+only the active region is sent, instead of the whole block."
+  (interactive "r")
+  (if (org-babel-is-region-within-src-block)
+      (let ((info (org-babel-get-src-block-info)))
+	(setcar (nthcdr 1 info) (buffer-substring beg end))
+	(org-babel-execute-src-block nil info))
+    (message "Region not in src-block!")))
+
+(defun org-babel-is-region-within-src-block (beg end)
+  "Check if region is within a single src-block.
+Block header and footer are ignored, so we are checking for the
+source code only.
+Used by `org-babel-execute-src-block-region' to check if region
+is executable."
+  (save-excursion
+    (eq
+     (progn
+       (goto-char beg)
+       (forward-line -1)
+       (org-babel-where-is-src-block-head))
+     (progn
+       (goto-char end)
+       (forward-line 1)
+       (org-babel-where-is-src-block-head)))))
+
 (defun org-babel-expand-body:generic (body params &optional var-lines)
   "Expand BODY with PARAMS.
 Expand a block of code with org-babel according to its header
